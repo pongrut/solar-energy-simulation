@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Solar Simulation — บ้านชัยภูมิ 3 แผง</title>
+<title>Solar Simulation — บ้านชัยภูมิ</title>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@300;400;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
 <style>
 :root {
@@ -14,431 +14,331 @@
   --text: #e2e8f0;
   --muted: #7b8ba8;
   --solar: #f59e0b;
-  --solar-dim: #b27308;
   --ac: #f43f5e;
   --home: #3b82f6;
   --green: #10b981;
-  --surplus-bg: rgba(16,185,129,0.08);
-  --deficit-bg: rgba(244,63,94,0.06);
   --radius: 10px;
 }
-* { box-sizing: border-box; margin: 0; padding: 0; }
-body {
-  background: var(--bg);
-  color: var(--text);
-  font-family: 'IBM Plex Sans Thai', sans-serif;
-  padding: 12px;
-  line-height: 1.5;
-}
-.container { max-width: 860px; margin: 0 auto; }
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:'IBM Plex Sans Thai',sans-serif;padding:12px;line-height:1.5}
+.container{max-width:860px;margin:0 auto}
+.header{text-align:center;margin-bottom:16px}
+.header h1{font-size:1.15rem;font-weight:700;background:linear-gradient(135deg,var(--solar),#fcd34d);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.header p{font-size:.7rem;color:var(--muted);margin-top:2px}
+.summary{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:12px}
+.sc{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:8px 4px;text-align:center}
+.sc .v{font-family:'JetBrains Mono',monospace;font-size:1.05rem;font-weight:700;line-height:1.2}
+.sc .l{font-size:.58rem;color:var(--muted);margin-top:1px}
+.c-s{color:var(--solar)}.c-a{color:var(--ac)}.c-h{color:var(--home)}.c-g{color:var(--green)}.c-r{color:var(--ac)}
+.panel{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:12px;margin-bottom:10px}
+.pt{font-size:.73rem;font-weight:600;margin-bottom:8px;display:flex;align-items:center;gap:5px}
 
-/* Header */
-.header { text-align: center; margin-bottom: 18px; }
-.header h1 {
-  font-size: 1.2rem; font-weight: 700;
-  background: linear-gradient(135deg, var(--solar), #fcd34d);
-  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-}
-.header p { font-size: 0.72rem; color: var(--muted); margin-top: 2px; }
+/* Stepper */
+.stepper-row{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:8px}
+.stepper{display:flex;align-items:center;gap:8px;background:var(--card2);border:1px solid var(--border);border-radius:8px;padding:6px 10px;flex:1;min-width:180px}
+.stepper .label{font-size:.7rem;flex:1}
+.stepper .label small{color:var(--muted);font-size:.6rem}
+.stepper button{width:28px;height:28px;border-radius:50%;border:1px solid var(--border);background:var(--card);color:var(--text);font-size:1rem;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:.15s}
+.stepper button:hover{border-color:var(--solar);color:var(--solar)}
+.stepper .num{font-family:'JetBrains Mono',monospace;font-size:1.1rem;font-weight:700;min-width:24px;text-align:center}
+.stepper.solar-s .num{color:var(--solar)}
+.stepper.ac-s .num{color:var(--ac)}
 
-/* Summary cards */
-.summary { display: grid; grid-template-columns: repeat(4,1fr); gap: 6px; margin-bottom: 14px; }
-.scard {
-  background: var(--card); border: 1px solid var(--border);
-  border-radius: var(--radius); padding: 8px 6px; text-align: center;
-}
-.scard .v {
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 1.1rem; font-weight: 700; line-height: 1.2;
-}
-.scard .l { font-size: 0.6rem; color: var(--muted); margin-top: 1px; }
-.c-solar { color: var(--solar); }
-.c-ac { color: var(--ac); }
-.c-home { color: var(--home); }
-.c-green { color: var(--green); }
-.c-red { color: var(--ac); }
-
-/* Panel */
-.panel {
-  background: var(--card); border: 1px solid var(--border);
-  border-radius: var(--radius); padding: 12px; margin-bottom: 12px;
-}
-.panel-title {
-  font-size: 0.75rem; font-weight: 600; margin-bottom: 10px;
-  display: flex; align-items: center; gap: 6px;
-}
-
-/* AC time picker */
-.time-grid {
-  display: grid; grid-template-columns: repeat(13, 1fr); gap: 3px;
-  margin-bottom: 8px;
-}
-.time-btn {
-  background: var(--card2); border: 1px solid var(--border);
-  border-radius: 6px; padding: 6px 0; text-align: center;
-  font-family: 'JetBrains Mono', monospace; font-size: 0.6rem;
-  color: var(--muted); cursor: pointer; transition: all 0.15s;
-  user-select: none; -webkit-user-select: none;
-}
-.time-btn.active {
-  background: rgba(244,63,94,0.18); border-color: var(--ac);
-  color: var(--ac); font-weight: 600;
-}
-.time-btn:hover { border-color: rgba(244,63,94,0.5); }
-.time-hint { font-size: 0.65rem; color: var(--muted); }
+/* Time grid */
+.time-grid{display:grid;grid-template-columns:repeat(13,1fr);gap:3px;margin-bottom:6px}
+.tb{background:var(--card2);border:1px solid var(--border);border-radius:6px;padding:5px 0;text-align:center;font-family:'JetBrains Mono',monospace;font-size:.58rem;color:var(--muted);cursor:pointer;transition:.12s;user-select:none;-webkit-user-select:none}
+.tb.on{background:rgba(244,63,94,.18);border-color:var(--ac);color:var(--ac);font-weight:600}
+.tb:hover{border-color:rgba(244,63,94,.5)}
+.hint{font-size:.62rem;color:var(--muted)}
 
 /* Sliders */
-.ctrl-row { display: flex; gap: 12px; flex-wrap: wrap; }
-.ctrl-item { flex: 1; min-width: 200px; }
-.ctrl-label {
-  display: flex; justify-content: space-between; align-items: center;
-  font-size: 0.72rem; margin-bottom: 4px;
-}
-.ctrl-val {
-  font-family: 'JetBrains Mono', monospace;
-  font-weight: 600; font-size: 0.78rem;
-}
-input[type=range] {
-  -webkit-appearance: none; width: 100%; height: 5px;
-  border-radius: 3px; outline: none; background: var(--border);
-}
-input[type=range]::-webkit-slider-thumb {
-  -webkit-appearance: none; width: 16px; height: 16px;
-  border-radius: 50%; cursor: pointer; border: 2px solid var(--bg);
-}
-.sl-ac { background: linear-gradient(90deg, #4a1525, var(--ac)) !important; }
-.sl-ac::-webkit-slider-thumb { background: var(--ac); }
-.sl-home { background: linear-gradient(90deg, #1a2744, var(--home)) !important; }
-.sl-home::-webkit-slider-thumb { background: var(--home); }
+.cr{display:flex;gap:10px;flex-wrap:wrap}
+.ci{flex:1;min-width:180px}
+.cl{display:flex;justify-content:space-between;font-size:.7rem;margin-bottom:3px}
+.cv{font-family:'JetBrains Mono',monospace;font-weight:600;font-size:.75rem}
+input[type=range]{-webkit-appearance:none;width:100%;height:5px;border-radius:3px;outline:none;background:var(--border)}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;border-radius:50%;cursor:pointer;border:2px solid var(--bg)}
+.sa{background:linear-gradient(90deg,#4a1525,var(--ac))!important}.sa::-webkit-slider-thumb{background:var(--ac)}
+.sh{background:linear-gradient(90deg,#1a2744,var(--home))!important}.sh::-webkit-slider-thumb{background:var(--home)}
 
 /* Chart */
-.chart-wrap { position: relative; width: 100%; height: 300px; }
-canvas { width: 100% !important; height: 100% !important; }
-
-/* Legend */
-.legend { display: flex; justify-content: center; gap: 14px; flex-wrap: wrap; margin-top: 8px; }
-.leg { display: flex; align-items: center; gap: 4px; font-size: 0.65rem; color: var(--muted); }
-.dot { width: 8px; height: 8px; border-radius: 50%; }
+.cw{position:relative;width:100%;height:300px}
+canvas{width:100%!important;height:100%!important}
+.legend{display:flex;justify-content:center;gap:12px;flex-wrap:wrap;margin-top:8px}
+.lg{display:flex;align-items:center;gap:4px;font-size:.62rem;color:var(--muted)}
+.dt{width:8px;height:8px;border-radius:50%}
 
 /* Table */
-.tbl-scroll { max-height: 240px; overflow-y: auto; }
-.tbl-scroll::-webkit-scrollbar { width: 3px; }
-.tbl-scroll::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
-table { width: 100%; border-collapse: collapse; font-size: 0.65rem; }
-th {
-  background: rgba(255,255,255,0.03); padding: 5px 6px;
-  text-align: right; color: var(--muted); font-weight: 600;
-  position: sticky; top: 0; z-index: 1;
-}
-th:first-child { text-align: center; }
-td {
-  padding: 4px 6px; text-align: right;
-  border-top: 1px solid rgba(255,255,255,0.03);
-  font-family: 'JetBrains Mono', monospace; font-size: 0.62rem;
-}
-td:first-child { text-align: center; color: var(--muted); font-family: 'IBM Plex Sans Thai', sans-serif; }
-.pos { color: var(--green); }
-.neg { color: var(--ac); }
-tr.peak-row { background: rgba(245,158,11,0.04); }
+.ts{max-height:220px;overflow-y:auto}.ts::-webkit-scrollbar{width:3px}.ts::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
+table{width:100%;border-collapse:collapse;font-size:.63rem}
+th{background:rgba(255,255,255,.03);padding:4px 5px;text-align:right;color:var(--muted);font-weight:600;position:sticky;top:0;z-index:1}
+th:first-child{text-align:center}
+td{padding:3px 5px;text-align:right;border-top:1px solid rgba(255,255,255,.03);font-family:'JetBrains Mono',monospace;font-size:.6rem}
+td:first-child{text-align:center;color:var(--muted);font-family:'IBM Plex Sans Thai',sans-serif}
+.pos{color:var(--green)}.neg{color:var(--ac)}
+tr.pk{background:rgba(245,158,11,.04)}
 
 /* Insight */
-.insight {
-  background: linear-gradient(135deg, rgba(16,185,129,0.06), rgba(245,158,11,0.06));
-  border: 1px solid rgba(16,185,129,0.15);
-  border-radius: var(--radius); padding: 12px;
-  font-size: 0.72rem; line-height: 1.7;
-}
-.insight b { color: var(--green); }
-.insight .warn { color: var(--ac); }
+.insight{background:linear-gradient(135deg,rgba(16,185,129,.06),rgba(245,158,11,.06));border:1px solid rgba(16,185,129,.15);border-radius:var(--radius);padding:12px;font-size:.7rem;line-height:1.7}
+.insight b{color:var(--green)}.insight .w{color:var(--ac)}
 
-@media (max-width: 600px) {
-  .summary { grid-template-columns: repeat(2,1fr); }
-  .time-grid { grid-template-columns: repeat(7,1fr); }
+@media(max-width:600px){
+  .summary{grid-template-columns:repeat(2,1fr)}
+  .time-grid{grid-template-columns:repeat(7,1fr)}
+  .stepper-row{flex-direction:column}
 }
 </style>
 </head>
 <body>
 <div class="container">
-
   <div class="header">
     <h1>☀️ Solar vs Consumption — บ้านชัยภูมิ</h1>
-    <p>3 แผง Longi 630W + ATMOCE MI-500 ทิศใต้ | แอร์ Inverter 12,000 BTU</p>
+    <p id="sysDesc">3 แผง Longi 630W + ATMOCE MI-500 ทิศใต้ | แอร์ Inverter 12,000 BTU x 1</p>
   </div>
 
   <div class="summary">
-    <div class="scard"><div class="v c-solar" id="sSolar">-</div><div class="l">☀️ ผลิตได้ (kWh)</div></div>
-    <div class="scard"><div class="v c-ac" id="sUse">-</div><div class="l">⚡ ใช้ทั้งหมด (kWh)</div></div>
-    <div class="scard"><div class="v" id="sNet">-</div><div class="l">📊 เหลือ / ขาด</div></div>
-    <div class="scard"><div class="v c-green" id="sSave">-</div><div class="l">💰 ประหยัด (บ./วัน)</div></div>
+    <div class="sc"><div class="v c-s" id="sSol">-</div><div class="l">☀️ ผลิตได้ (kWh)</div></div>
+    <div class="sc"><div class="v c-a" id="sUse">-</div><div class="l">⚡ ใช้ทั้งหมด (kWh)</div></div>
+    <div class="sc"><div class="v" id="sNet">-</div><div class="l">📊 เหลือ / ขาด</div></div>
+    <div class="sc"><div class="v c-g" id="sSav">-</div><div class="l">💰 ประหยัด (บ./วัน)</div></div>
   </div>
 
-  <!-- AC Time Picker -->
+  <!-- Panel & AC count -->
   <div class="panel">
-    <div class="panel-title">❄️ เลือกช่วงเวลาเปิดแอร์ (แตะเปิด/ปิดแต่ละชั่วโมง)</div>
-    <div class="time-grid" id="timeGrid"></div>
-    <div class="time-hint">💡 แอร์ Inverter 12,000 BTU กินไฟเฉลี่ย <span id="acWLabel">900</span>W ขณะทำงาน</div>
+    <div class="pt">⚙️ ปรับระบบ</div>
+    <div class="stepper-row">
+      <div class="stepper solar-s">
+        <div class="label">☀️ จำนวนแผง<br><small>Longi 630W + MI-500</small></div>
+        <button onclick="adjPanel(-1)">−</button>
+        <div class="num" id="panelNum">3</div>
+        <button onclick="adjPanel(1)">+</button>
+      </div>
+      <div class="stepper ac-s">
+        <div class="label">❄️ จำนวนแอร์<br><small>Inverter 12,000 BTU</small></div>
+        <button onclick="adjAC(-1)">−</button>
+        <div class="num" id="acNum">1</div>
+        <button onclick="adjAC(1)">+</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- AC Time -->
+  <div class="panel">
+    <div class="pt">🕐 ช่วงเวลาเปิดแอร์ (แตะเปิด/ปิดแต่ละชั่วโมง)</div>
+    <div class="time-grid" id="tg"></div>
+    <div class="hint">❄️ แอร์ Inverter 12,000 BTU กินไฟเฉลี่ย <span id="acWL">900</span>W/ตัว × <span id="acCntL">1</span> ตัว = <b id="acTotL">900</b>W</div>
   </div>
 
   <!-- Sliders -->
   <div class="panel">
-    <div class="ctrl-row">
-      <div class="ctrl-item">
-        <div class="ctrl-label">
-          <span>❄️ กำลังแอร์เฉลี่ย (W)</span>
-          <span class="ctrl-val c-ac" id="acVal">900</span>
-        </div>
-        <input type="range" class="sl-ac" id="slAC" min="600" max="1200" step="50" value="900">
+    <div class="cr">
+      <div class="ci">
+        <div class="cl"><span>❄️ กำลังแอร์เฉลี่ย/ตัว (W)</span><span class="cv c-a" id="acV">900</span></div>
+        <input type="range" class="sa" id="slA" min="600" max="1200" step="50" value="900">
       </div>
-      <div class="ctrl-item">
-        <div class="ctrl-label">
-          <span>🏠 ไฟบ้านพื้นฐาน (W)</span>
-          <span class="ctrl-val c-home" id="homeVal">300</span>
-        </div>
-        <input type="range" class="sl-home" id="slHome" min="100" max="600" step="50" value="300">
+      <div class="ci">
+        <div class="cl"><span>🏠 ไฟบ้านพื้นฐาน (W)</span><span class="cv c-h" id="hmV">300</span></div>
+        <input type="range" class="sh" id="slH" min="100" max="800" step="50" value="300">
       </div>
     </div>
   </div>
 
   <!-- Chart -->
   <div class="panel">
-    <div class="panel-title">📈 กำลังผลิต vs การใช้ไฟ รายชั่วโมง</div>
-    <div class="chart-wrap"><canvas id="chart"></canvas></div>
+    <div class="pt">📈 กำลังผลิต vs การใช้ไฟ รายชั่วโมง</div>
+    <div class="cw"><canvas id="cv"></canvas></div>
     <div class="legend">
-      <div class="leg"><div class="dot" style="background:var(--solar)"></div>Solar ผลิต</div>
-      <div class="leg"><div class="dot" style="background:var(--ac)"></div>แอร์ 12K BTU</div>
-      <div class="leg"><div class="dot" style="background:var(--home)"></div>ไฟบ้านพื้นฐาน</div>
-      <div class="leg"><div class="dot" style="background:var(--green)"></div>เหลือ (ไม่ซื้อไฟ)</div>
-      <div class="leg"><div class="dot" style="background:rgba(244,63,94,0.3)"></div>ขาด (ซื้อจาก grid)</div>
+      <div class="lg"><div class="dt" style="background:var(--solar)"></div>Solar ผลิต</div>
+      <div class="lg"><div class="dt" style="background:var(--ac)"></div>แอร์ทั้งหมด</div>
+      <div class="lg"><div class="dt" style="background:var(--home)"></div>ไฟบ้าน</div>
+      <div class="lg"><div class="dt" style="background:var(--green)"></div>เหลือ</div>
+      <div class="lg"><div class="dt" style="background:rgba(244,63,94,.3)"></div>ขาด (ซื้อ grid)</div>
     </div>
   </div>
 
   <!-- Table -->
   <div class="panel">
-    <div class="panel-title">📊 ตารางรายชั่วโมง</div>
-    <div class="tbl-scroll">
-      <table>
-        <thead><tr>
-          <th>เวลา</th><th>☀️ ผลิต</th><th>❄️ แอร์</th><th>🏠 ไฟบ้าน</th><th>⚡ รวมใช้</th><th>+/−</th>
-        </tr></thead>
-        <tbody id="tbody"></tbody>
-      </table>
+    <div class="pt">📊 ตารางรายชั่วโมง</div>
+    <div class="ts">
+      <table><thead><tr><th>เวลา</th><th>☀️ ผลิต</th><th>❄️ แอร์</th><th>🏠 บ้าน</th><th>⚡ รวม</th><th>+/−</th></tr></thead>
+      <tbody id="tb"></tbody></table>
     </div>
   </div>
 
-  <div class="insight" id="insight"></div>
-
+  <div class="insight" id="ins"></div>
 </div>
 
 <script>
-const hours = [];
-for (let h = 6; h <= 18; h++) hours.push(h);
-const labels = hours.map(h => String(h).padStart(2,'0') + ':00');
+const H=[6,7,8,9,10,11,12,13,14,15,16,17,18];
+const LB=H.map(h=>String(h).padStart(2,'0')+':00');
 
-// Solar curve 3 panels 1.89kWp south-facing Chaiyaphum
-const solarBase = [0, 95, 380, 760, 1140, 1520, 1710, 1800, 1710, 1520, 1140, 760, 380];
-// Home load variation pattern through day
-const homePat = [0.7, 0.8, 0.9, 1.0, 1.0, 1.05, 1.1, 1.1, 1.05, 1.0, 0.95, 0.85, 0.75];
+// Solar per panel (630W Longi + MI-500 97.4% eff, south-facing Chaiyaphum)
+const S1=[0,32,127,253,380,507,570,600,570,507,380,253,127];
+// Home load pattern
+const HP=[.7,.8,.9,1,1,1.05,1.1,1.1,1.05,1,.95,.85,.75];
 
-// AC schedule state
-let acOn = new Array(13).fill(false);
-// Default: 10:00-15:00 on
-[4,5,6,7,8,9].forEach(i => acOn[i] = true);
+let panels=3, acUnits=1;
+let acOn=Array(13).fill(false);
+[4,5,6,7,8,9].forEach(i=>acOn[i]=true);
 
 // Build time grid
-const grid = document.getElementById('timeGrid');
-hours.forEach((h, i) => {
-  const btn = document.createElement('div');
-  btn.className = 'time-btn' + (acOn[i] ? ' active' : '');
-  btn.textContent = String(h).padStart(2,'0');
-  btn.dataset.idx = i;
-  btn.addEventListener('click', () => {
-    acOn[i] = !acOn[i];
-    btn.classList.toggle('active', acOn[i]);
-    render();
-  });
-  grid.appendChild(btn);
+const tg=document.getElementById('tg');
+H.forEach((_,i)=>{
+  const b=document.createElement('div');
+  b.className='tb'+(acOn[i]?' on':'');
+  b.textContent=String(H[i]).padStart(2,'0');
+  b.dataset.i=i;
+  b.addEventListener('click',()=>{acOn[i]=!acOn[i];b.classList.toggle('on',acOn[i]);render()});
+  tg.appendChild(b);
 });
 
-const canvas = document.getElementById('chart');
-const ctx = canvas.getContext('2d');
+function adjPanel(d){panels=Math.max(1,Math.min(10,panels+d));document.getElementById('panelNum').textContent=panels;render()}
+function adjAC(d){acUnits=Math.max(0,Math.min(4,acUnits+d));document.getElementById('acNum').textContent=acUnits;render()}
 
-function render() {
-  const acW = +document.getElementById('slAC').value;
-  const homeW = +document.getElementById('slHome').value;
-  document.getElementById('acVal').textContent = acW;
-  document.getElementById('homeVal').textContent = homeW;
-  document.getElementById('acWLabel').textContent = acW;
+const cvs=document.getElementById('cv'),cx=cvs.getContext('2d');
 
-  const solar = solarBase.slice();
-  const ac = acOn.map(on => on ? acW : 0);
-  const home = homePat.map(p => Math.round(p * homeW));
-  const total = ac.map((a,i) => a + home[i]);
-  const net = solar.map((s,i) => s - total[i]);
+function render(){
+  const acW=+document.getElementById('slA').value;
+  const hmW=+document.getElementById('slH').value;
+  document.getElementById('acV').textContent=acW;
+  document.getElementById('hmV').textContent=hmW;
+  document.getElementById('acWL').textContent=acW;
+  document.getElementById('acCntL').textContent=acUnits;
+  document.getElementById('acTotL').textContent=acW*acUnits;
 
-  const sumSolar = solar.reduce((a,b) => a+b, 0) / 1000;
-  const sumUse = total.reduce((a,b) => a+b, 0) / 1000;
-  const sumNet = (sumSolar - sumUse);
-  const selfConsumed = solar.reduce((acc, s, i) => acc + Math.min(s, total[i]), 0) / 1000;
-  const savedBaht = (selfConsumed * 4.3).toFixed(0);
+  const kWp=(panels*0.63).toFixed(2);
+  document.getElementById('sysDesc').textContent=
+    `${panels} แผง Longi 630W (${kWp} kWp) + ATMOCE MI-500 ทิศใต้ | แอร์ Inv. 12K BTU × ${acUnits}`;
 
-  document.getElementById('sSolar').textContent = sumSolar.toFixed(1);
-  document.getElementById('sUse').textContent = sumUse.toFixed(1);
-  const netEl = document.getElementById('sNet');
-  netEl.textContent = (sumNet >= 0 ? '+' : '') + sumNet.toFixed(1);
-  netEl.className = 'v ' + (sumNet >= 0 ? 'c-green' : 'c-red');
-  document.getElementById('sSave').textContent = '~' + savedBaht;
+  const sol=S1.map(s=>s*panels);
+  const ac=acOn.map(on=>on?acW*acUnits:0);
+  const hm=HP.map(p=>Math.round(p*hmW));
+  const tot=ac.map((a,i)=>a+hm[i]);
+  const net=sol.map((s,i)=>s-tot[i]);
+
+  const sumS=sol.reduce((a,b)=>a+b,0)/1000;
+  const sumU=tot.reduce((a,b)=>a+b,0)/1000;
+  const sumN=sumS-sumU;
+  const selfC=sol.reduce((a,s,i)=>a+Math.min(s,tot[i]),0)/1000;
+  const savB=(selfC*4.3).toFixed(0);
+
+  document.getElementById('sSol').textContent=sumS.toFixed(1);
+  document.getElementById('sUse').textContent=sumU.toFixed(1);
+  const ne=document.getElementById('sNet');
+  ne.textContent=(sumN>=0?'+':'')+sumN.toFixed(1);
+  ne.className='v '+(sumN>=0?'c-g':'c-r');
+  document.getElementById('sSav').textContent='~'+savB;
 
   // Table
-  let tb = '';
-  for (let i = 0; i < hours.length; i++) {
-    const n = net[i];
-    const cls = n >= 0 ? 'pos' : 'neg';
-    const sign = n >= 0 ? '+' : '';
-    const peak = (solar[i] >= 1500) ? ' peak-row' : '';
-    tb += `<tr class="${peak}">
-      <td>${labels[i]}</td>
-      <td style="color:var(--solar)">${solar[i]}</td>
-      <td style="color:${ac[i]?'var(--ac)':'var(--muted)'}">${ac[i]}</td>
-      <td style="color:var(--home)">${home[i]}</td>
-      <td>${total[i]}</td>
-      <td class="${cls}">${sign}${n}</td>
-    </tr>`;
+  let tb='';
+  for(let i=0;i<H.length;i++){
+    const n=net[i],cls=n>=0?'pos':'neg',sg=n>=0?'+':'',pk=sol[i]>=panels*500?' pk':'';
+    tb+=`<tr class="${pk}"><td>${LB[i]}</td><td style="color:var(--solar)">${sol[i]}</td><td style="color:${ac[i]?'var(--ac)':'var(--muted)'}">${ac[i]}</td><td style="color:var(--home)">${hm[i]}</td><td>${tot[i]}</td><td class="${cls}">${sg}${n}</td></tr>`;
   }
-  document.getElementById('tbody').innerHTML = tb;
+  document.getElementById('tb').innerHTML=tb;
 
   // Insight
-  const acHrs = acOn.filter(Boolean).length;
-  const surplusH = net.filter(n => n > 0).length;
-  const deficitH = net.filter(n => n < 0).length;
-  const gridBuy = net.filter(n => n < 0).reduce((a,b) => a+b, 0) / 1000;
-  const gridCost = (Math.abs(gridBuy) * 4.3).toFixed(0);
-  const selfRate = sumUse > 0 ? Math.min(100, Math.round(selfConsumed / sumUse * 100)) : 0;
+  const acH=acOn.filter(Boolean).length;
+  const sH=net.filter(n=>n>0).length,dH=net.filter(n=>n<0).length;
+  const gB=net.filter(n=>n<0).reduce((a,b)=>a+b,0)/1000;
+  const gC=(Math.abs(gB)*4.3).toFixed(0);
+  const sr=sumU>0?Math.min(100,Math.round(selfC/sumU*100)):0;
 
-  document.getElementById('insight').innerHTML = `
-    <b>💡 สรุป:</b> เปิดแอร์ ${acHrs} ชม. | ผลิตได้ <b>${sumSolar.toFixed(1)} kWh</b> ใช้ <b>${sumUse.toFixed(1)} kWh</b><br>
-    ${sumNet >= 0
-      ? `✅ <b>ผลิตเกินใช้ ${sumNet.toFixed(1)} kWh</b> — Solar ครอบคลุมทั้งหมด! ประหยัดได้ ~<b>${savedBaht} บ./วัน</b>`
-      : `⚠️ ขาดอีก <span class="warn">${Math.abs(sumNet).toFixed(1)} kWh</span> ต้องซื้อจาก grid ~<span class="warn">${gridCost} บ.</span> | ประหยัดได้ ~<b>${savedBaht} บ./วัน</b>`
+  document.getElementById('ins').innerHTML=`
+    <b>💡 สรุป:</b> ${panels} แผง (${kWp} kWp) | แอร์ ${acUnits} ตัว เปิด ${acH} ชม.<br>
+    ผลิต <b>${sumS.toFixed(1)} kWh</b> ใช้ <b>${sumU.toFixed(1)} kWh</b>
+    ${sumN>=0
+      ?` → ✅ <b>เหลือ ${sumN.toFixed(1)} kWh</b> ประหยัด ~<b>${savB} บ./วัน</b>`
+      :` → ⚠️ ขาด <span class="w">${Math.abs(sumN).toFixed(1)} kWh</span> ซื้อ grid ~<span class="w">${gC} บ.</span> | ประหยัด ~<b>${savB} บ./วัน</b>`
     }<br>
-    Self-consumption rate: <b>${selfRate}%</b> | เหลือ ${surplusH} ชม. | ขาด ${deficitH} ชม.<br>
-    📅 ประหยัด/เดือน ≈ <b>${(savedBaht * 30 / 1).toLocaleString()} บาท</b> (ประมาณ 30 วัน, วันแดดดี)
+    Self-use: <b>${sr}%</b> | เหลือ ${sH} ชม. | ขาด ${dH} ชม.<br>
+    📅 ประหยัด/เดือน ≈ <b>${(savB*30).toLocaleString()} บาท</b> (30 วัน, แดดดี)
+    ${panels<=3&&sumN<-1?'<br>💡 <b>ลองเพิ่มแผงดู</b> — ATMOCE ขยายง่ายแค่เพิ่มแผง+MI-500':''}
+    ${acUnits>=2&&sumN<-2?'<br>💡 <span class="w">แอร์หลายตัว กินไฟเยอะ</span> — อาจต้องเพิ่มแผงหรือลดช่วงเวลาเปิด':''}
   `;
-
-  drawChart(solar, ac, home, total, net);
+  drawChart(sol,ac,hm,tot,net);
 }
 
-function drawChart(solar, ac, home, total, net) {
-  const dpr = window.devicePixelRatio || 1;
-  const rect = canvas.parentElement.getBoundingClientRect();
-  canvas.width = rect.width * dpr;
-  canvas.height = rect.height * dpr;
-  ctx.scale(dpr, dpr);
-  const W = rect.width, H = rect.height;
-  ctx.clearRect(0, 0, W, H);
+function drawChart(sol,ac,hm,tot,net){
+  const dpr=window.devicePixelRatio||1;
+  const r=cvs.parentElement.getBoundingClientRect();
+  cvs.width=r.width*dpr;cvs.height=r.height*dpr;
+  cx.scale(dpr,dpr);
+  const W=r.width,Ht=r.height;
+  cx.clearRect(0,0,W,Ht);
 
-  const pad = { top: 8, right: 10, bottom: 28, left: 38 };
-  const cw = W - pad.left - pad.right;
-  const ch = H - pad.top - pad.bottom;
-  const maxV = Math.max(2000, ...solar, ...total) * 1.12;
+  const p={t:8,r:10,b:28,l:38};
+  const cw=W-p.l-p.r,ch=Ht-p.t-p.b;
+  const mx=Math.max(2000,...sol,...tot)*1.15;
 
-  const xp = i => pad.left + (i / (hours.length - 1)) * cw;
-  const yp = v => pad.top + ch - (v / maxV) * ch;
+  const xp=i=>p.l+(i/(H.length-1))*cw;
+  const yp=v=>p.t+ch-(v/mx)*ch;
 
-  // Grid lines
-  ctx.strokeStyle = 'rgba(255,255,255,0.05)';
-  ctx.lineWidth = 1;
-  ctx.fillStyle = '#4a5a78';
-  ctx.font = '9px JetBrains Mono';
-  ctx.textAlign = 'right';
-  for (let v = 0; v <= maxV; v += 500) {
-    ctx.beginPath(); ctx.moveTo(pad.left, yp(v)); ctx.lineTo(W - pad.right, yp(v)); ctx.stroke();
-    ctx.fillText(v >= 1000 ? (v/1000).toFixed(1)+'k' : v+'', pad.left - 4, yp(v) + 3);
+  // Grid
+  cx.strokeStyle='rgba(255,255,255,.05)';cx.lineWidth=1;
+  cx.fillStyle='#4a5a78';cx.font='9px JetBrains Mono';cx.textAlign='right';
+  for(let v=0;v<=mx;v+=500){
+    cx.beginPath();cx.moveTo(p.l,yp(v));cx.lineTo(W-p.r,yp(v));cx.stroke();
+    cx.fillText(v>=1000?(v/1000).toFixed(1)+'k':v+'',p.l-4,yp(v)+3);
   }
-  // X labels
-  ctx.fillStyle = '#4a5a78';
-  ctx.font = '8px JetBrains Mono';
-  ctx.textAlign = 'center';
-  for (let i = 0; i < hours.length; i += 1) {
-    ctx.fillText(labels[i].slice(0,2), xp(i), H - 8);
-  }
+  cx.fillStyle='#4a5a78';cx.font='8px JetBrains Mono';cx.textAlign='center';
+  for(let i=0;i<H.length;i++) cx.fillText(LB[i].slice(0,2),xp(i),Ht-8);
 
-  // Surplus / deficit shading
-  for (let i = 0; i < hours.length - 1; i++) {
-    const x1 = xp(i), x2 = xp(i+1);
-    if (net[i] >= 0 && net[i+1] >= 0) {
-      ctx.fillStyle = 'rgba(16,185,129,0.1)';
-      ctx.beginPath();
-      ctx.moveTo(x1, yp(solar[i])); ctx.lineTo(x2, yp(solar[i+1]));
-      ctx.lineTo(x2, yp(total[i+1])); ctx.lineTo(x1, yp(total[i]));
-      ctx.closePath(); ctx.fill();
-    } else if (net[i] < 0 && net[i+1] < 0) {
-      ctx.fillStyle = 'rgba(244,63,94,0.07)';
-      ctx.beginPath();
-      ctx.moveTo(x1, yp(total[i])); ctx.lineTo(x2, yp(total[i+1]));
-      ctx.lineTo(x2, yp(solar[i+1])); ctx.lineTo(x1, yp(solar[i]));
-      ctx.closePath(); ctx.fill();
+  // Shade
+  for(let i=0;i<H.length-1;i++){
+    const x1=xp(i),x2=xp(i+1);
+    if(net[i]>=0&&net[i+1]>=0){
+      cx.fillStyle='rgba(16,185,129,.1)';
+      cx.beginPath();cx.moveTo(x1,yp(sol[i]));cx.lineTo(x2,yp(sol[i+1]));cx.lineTo(x2,yp(tot[i+1]));cx.lineTo(x1,yp(tot[i]));cx.closePath();cx.fill();
+    }else if(net[i]<0&&net[i+1]<0){
+      cx.fillStyle='rgba(244,63,94,.07)';
+      cx.beginPath();cx.moveTo(x1,yp(tot[i]));cx.lineTo(x2,yp(tot[i+1]));cx.lineTo(x2,yp(sol[i+1]));cx.lineTo(x1,yp(sol[i]));cx.closePath();cx.fill();
     }
   }
 
   // Home fill
-  ctx.fillStyle = 'rgba(59,130,246,0.12)';
-  ctx.beginPath(); ctx.moveTo(xp(0), yp(0));
-  for (let i = 0; i < hours.length; i++) ctx.lineTo(xp(i), yp(home[i]));
-  ctx.lineTo(xp(hours.length-1), yp(0)); ctx.closePath(); ctx.fill();
+  cx.fillStyle='rgba(59,130,246,.12)';
+  cx.beginPath();cx.moveTo(xp(0),yp(0));
+  for(let i=0;i<H.length;i++) cx.lineTo(xp(i),yp(hm[i]));
+  cx.lineTo(xp(H.length-1),yp(0));cx.closePath();cx.fill();
 
-  // AC fill (stacked)
-  ctx.fillStyle = 'rgba(244,63,94,0.1)';
-  ctx.beginPath(); ctx.moveTo(xp(0), yp(home[0]));
-  for (let i = 0; i < hours.length; i++) ctx.lineTo(xp(i), yp(total[i]));
-  for (let i = hours.length-1; i >= 0; i--) ctx.lineTo(xp(i), yp(home[i]));
-  ctx.closePath(); ctx.fill();
+  // AC fill
+  cx.fillStyle='rgba(244,63,94,.1)';
+  cx.beginPath();cx.moveTo(xp(0),yp(hm[0]));
+  for(let i=0;i<H.length;i++) cx.lineTo(xp(i),yp(tot[i]));
+  for(let i=H.length-1;i>=0;i--) cx.lineTo(xp(i),yp(hm[i]));
+  cx.closePath();cx.fill();
 
-  // Draw lines
-  function line(data, col, w, dash) {
-    ctx.strokeStyle = col; ctx.lineWidth = w;
-    ctx.setLineDash(dash || []); ctx.lineJoin = 'round'; ctx.lineCap = 'round';
-    ctx.beginPath();
-    data.forEach((v, i) => i === 0 ? ctx.moveTo(xp(i), yp(v)) : ctx.lineTo(xp(i), yp(v)));
-    ctx.stroke(); ctx.setLineDash([]);
+  function line(d,c,w,da){
+    cx.strokeStyle=c;cx.lineWidth=w;cx.setLineDash(da||[]);cx.lineJoin='round';cx.lineCap='round';
+    cx.beginPath();d.forEach((v,i)=>i===0?cx.moveTo(xp(i),yp(v)):cx.lineTo(xp(i),yp(v)));cx.stroke();cx.setLineDash([]);
   }
+  line(hm,'rgba(59,130,246,.5)',1.2,[4,3]);
+  line(tot,'#f43f5e',2);
+  line(sol,'#f59e0b',2.5);
 
-  line(home, 'rgba(59,130,246,0.5)', 1.2, [4,3]);
-  line(total, var_ac_color(), 2);
-  line(solar, '#f59e0b', 2.5);
-
-  // Solar dots
-  for (let i = 0; i < solar.length; i++) {
-    if (solar[i] > 0) {
-      ctx.fillStyle = '#f59e0b';
-      ctx.beginPath(); ctx.arc(xp(i), yp(solar[i]), 3.5, 0, Math.PI*2); ctx.fill();
-      ctx.fillStyle = var_bg();
-      ctx.beginPath(); ctx.arc(xp(i), yp(solar[i]), 1.5, 0, Math.PI*2); ctx.fill();
+  // Dots
+  for(let i=0;i<sol.length;i++){
+    if(sol[i]>0){
+      cx.fillStyle='#f59e0b';cx.beginPath();cx.arc(xp(i),yp(sol[i]),3.5,0,Math.PI*2);cx.fill();
+      cx.fillStyle='#0c1220';cx.beginPath();cx.arc(xp(i),yp(sol[i]),1.5,0,Math.PI*2);cx.fill();
     }
   }
-
-  // Net indicators
-  for (let i = 0; i < hours.length; i++) {
-    if (net[i] > 200) {
-      ctx.fillStyle = 'rgba(16,185,129,0.6)';
-      ctx.font = 'bold 8px JetBrains Mono';
-      ctx.textAlign = 'center';
-      ctx.fillText('+' + net[i], xp(i), yp(solar[i]) - 8);
-    } else if (net[i] < -200) {
-      ctx.fillStyle = 'rgba(244,63,94,0.6)';
-      ctx.font = 'bold 8px JetBrains Mono';
-      ctx.textAlign = 'center';
-      ctx.fillText(net[i], xp(i), yp(total[i]) - 8);
+  // Labels
+  for(let i=0;i<H.length;i++){
+    if(net[i]>150){
+      cx.fillStyle='rgba(16,185,129,.7)';cx.font='bold 8px JetBrains Mono';cx.textAlign='center';
+      cx.fillText('+'+net[i],xp(i),yp(sol[i])-8);
+    }else if(net[i]<-150){
+      cx.fillStyle='rgba(244,63,94,.7)';cx.font='bold 8px JetBrains Mono';cx.textAlign='center';
+      cx.fillText(net[i],xp(i),yp(tot[i])-8);
     }
   }
 }
 
-function var_ac_color() { return '#f43f5e'; }
-function var_bg() { return '#0c1220'; }
-
-// Events
-document.getElementById('slAC').addEventListener('input', render);
-document.getElementById('slHome').addEventListener('input', render);
-window.addEventListener('resize', render);
+document.getElementById('slA').addEventListener('input',render);
+document.getElementById('slH').addEventListener('input',render);
+window.addEventListener('resize',render);
 render();
 </script>
 </body>
