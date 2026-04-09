@@ -3,341 +3,409 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Solar Simulation — บ้านชัยภูมิ</title>
+<title>Solar Simulation + TOU — บ้านชัยภูมิ</title>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@300;400;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
 <style>
-:root {
-  --bg: #0c1220;
-  --card: #151f35;
-  --card2: #1a2744;
-  --border: #243154;
-  --text: #e2e8f0;
-  --muted: #7b8ba8;
-  --solar: #f59e0b;
-  --ac: #f43f5e;
-  --home: #3b82f6;
-  --green: #10b981;
-  --radius: 10px;
-}
+:root{--bg:#0c1220;--card:#151f35;--card2:#1a2744;--border:#243154;--text:#e2e8f0;--muted:#7b8ba8;--solar:#f59e0b;--ac:#f43f5e;--home:#3b82f6;--green:#10b981;--night:#8b5cf6;--peak:#ef4444;--offpeak:#22d3ee;--r:10px}
 *{box-sizing:border-box;margin:0;padding:0}
-body{background:var(--bg);color:var(--text);font-family:'IBM Plex Sans Thai',sans-serif;padding:12px;line-height:1.5}
-.container{max-width:860px;margin:0 auto}
-.header{text-align:center;margin-bottom:16px}
-.header h1{font-size:1.15rem;font-weight:700;background:linear-gradient(135deg,var(--solar),#fcd34d);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
-.header p{font-size:.7rem;color:var(--muted);margin-top:2px}
-.summary{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:12px}
-.sc{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:8px 4px;text-align:center}
-.sc .v{font-family:'JetBrains Mono',monospace;font-size:1.05rem;font-weight:700;line-height:1.2}
-.sc .l{font-size:.58rem;color:var(--muted);margin-top:1px}
-.c-s{color:var(--solar)}.c-a{color:var(--ac)}.c-h{color:var(--home)}.c-g{color:var(--green)}.c-r{color:var(--ac)}
-.panel{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:12px;margin-bottom:10px}
-.pt{font-size:.73rem;font-weight:600;margin-bottom:8px;display:flex;align-items:center;gap:5px}
-
+body{background:var(--bg);color:var(--text);font-family:'IBM Plex Sans Thai',sans-serif;padding:10px;line-height:1.5;font-size:14px}
+.ctr{max-width:880px;margin:0 auto}
+.hdr{text-align:center;margin-bottom:14px}
+.hdr h1{font-size:1.1rem;font-weight:700;background:linear-gradient(135deg,var(--solar),#fcd34d);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.hdr p{font-size:.65rem;color:var(--muted);margin-top:2px}
+/* Summary */
+.sum{display:grid;grid-template-columns:repeat(5,1fr);gap:5px;margin-bottom:10px}
+.sc{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:7px 3px;text-align:center}
+.sc .v{font-family:'JetBrains Mono',monospace;font-size:.95rem;font-weight:700;line-height:1.2}
+.sc .l{font-size:.52rem;color:var(--muted);margin-top:1px}
+/* Panel */
+.pn{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:10px;margin-bottom:8px}
+.pt{font-size:.7rem;font-weight:600;margin-bottom:7px;display:flex;align-items:center;gap:4px}
+/* TOU badge */
+.tou-info{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px}
+.tou-badge{font-size:.6rem;padding:3px 8px;border-radius:6px;font-family:'JetBrains Mono',monospace;font-weight:600}
+.tou-pk{background:rgba(239,68,68,.12);color:var(--peak);border:1px solid rgba(239,68,68,.3)}
+.tou-op{background:rgba(34,211,238,.1);color:var(--offpeak);border:1px solid rgba(34,211,238,.3)}
 /* Stepper */
-.stepper-row{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:8px}
-.stepper{display:flex;align-items:center;gap:8px;background:var(--card2);border:1px solid var(--border);border-radius:8px;padding:6px 10px;flex:1;min-width:180px}
-.stepper .label{font-size:.7rem;flex:1}
-.stepper .label small{color:var(--muted);font-size:.6rem}
-.stepper button{width:28px;height:28px;border-radius:50%;border:1px solid var(--border);background:var(--card);color:var(--text);font-size:1rem;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:.15s}
-.stepper button:hover{border-color:var(--solar);color:var(--solar)}
-.stepper .num{font-family:'JetBrains Mono',monospace;font-size:1.1rem;font-weight:700;min-width:24px;text-align:center}
-.stepper.solar-s .num{color:var(--solar)}
-.stepper.ac-s .num{color:var(--ac)}
-
+.sr{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:6px}
+.stp{display:flex;align-items:center;gap:6px;background:var(--card2);border:1px solid var(--border);border-radius:8px;padding:5px 8px;flex:1;min-width:170px}
+.stp .lb{font-size:.65rem;flex:1}.stp .lb small{color:var(--muted);font-size:.55rem}
+.stp button{width:26px;height:26px;border-radius:50%;border:1px solid var(--border);background:var(--card);color:var(--text);font-size:.9rem;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.stp button:hover{border-color:var(--solar);color:var(--solar)}
+.stp .nm{font-family:'JetBrains Mono',monospace;font-size:1rem;font-weight:700;min-width:20px;text-align:center}
+.c-s{color:var(--solar)}.c-a{color:var(--ac)}.c-h{color:var(--home)}.c-g{color:var(--green)}.c-r{color:var(--ac)}.c-n{color:var(--night)}.c-pk{color:var(--peak)}.c-op{color:var(--offpeak)}
 /* Time grid */
-.time-grid{display:grid;grid-template-columns:repeat(13,1fr);gap:3px;margin-bottom:6px}
-.tb{background:var(--card2);border:1px solid var(--border);border-radius:6px;padding:5px 0;text-align:center;font-family:'JetBrains Mono',monospace;font-size:.58rem;color:var(--muted);cursor:pointer;transition:.12s;user-select:none;-webkit-user-select:none}
+.tg{display:flex;gap:2px;flex-wrap:wrap;margin-bottom:5px}
+.tb{background:var(--card2);border:1px solid var(--border);border-radius:5px;padding:4px 0;text-align:center;font-family:'JetBrains Mono',monospace;font-size:.55rem;color:var(--muted);cursor:pointer;transition:.1s;user-select:none;-webkit-user-select:none;flex:1;min-width:28px}
 .tb.on{background:rgba(244,63,94,.18);border-color:var(--ac);color:var(--ac);font-weight:600}
-.tb:hover{border-color:rgba(244,63,94,.5)}
-.hint{font-size:.62rem;color:var(--muted)}
-
-/* Sliders */
-.cr{display:flex;gap:10px;flex-wrap:wrap}
-.ci{flex:1;min-width:180px}
-.cl{display:flex;justify-content:space-between;font-size:.7rem;margin-bottom:3px}
-.cv{font-family:'JetBrains Mono',monospace;font-weight:600;font-size:.75rem}
-input[type=range]{-webkit-appearance:none;width:100%;height:5px;border-radius:3px;outline:none;background:var(--border)}
-input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;border-radius:50%;cursor:pointer;border:2px solid var(--bg)}
-.sa{background:linear-gradient(90deg,#4a1525,var(--ac))!important}.sa::-webkit-slider-thumb{background:var(--ac)}
-.sh{background:linear-gradient(90deg,#1a2744,var(--home))!important}.sh::-webkit-slider-thumb{background:var(--home)}
-
+.tb.on-n{background:rgba(139,92,246,.18);border-color:var(--night);color:var(--night);font-weight:600}
+.hint{font-size:.58rem;color:var(--muted)}
+/* Slider */
+.cr{display:flex;gap:8px;flex-wrap:wrap}
+.ci{flex:1;min-width:170px}
+.cl{display:flex;justify-content:space-between;font-size:.65rem;margin-bottom:2px}
+.cv{font-family:'JetBrains Mono',monospace;font-weight:600;font-size:.7rem}
+input[type=range]{-webkit-appearance:none;width:100%;height:4px;border-radius:2px;outline:none;background:var(--border)}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:14px;height:14px;border-radius:50%;cursor:pointer;border:2px solid var(--bg)}
+.sa::-webkit-slider-thumb{background:var(--ac)}.sh::-webkit-slider-thumb{background:var(--home)}
 /* Chart */
-.cw{position:relative;width:100%;height:300px}
+.cw{position:relative;width:100%;height:260px}
 canvas{width:100%!important;height:100%!important}
-.legend{display:flex;justify-content:center;gap:12px;flex-wrap:wrap;margin-top:8px}
-.lg{display:flex;align-items:center;gap:4px;font-size:.62rem;color:var(--muted)}
-.dt{width:8px;height:8px;border-radius:50%}
-
+.lg{display:flex;justify-content:center;gap:10px;flex-wrap:wrap;margin-top:6px}
+.lgi{display:flex;align-items:center;gap:3px;font-size:.58rem;color:var(--muted)}
+.d{width:7px;height:7px;border-radius:50%}
 /* Table */
-.ts{max-height:220px;overflow-y:auto}.ts::-webkit-scrollbar{width:3px}.ts::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
-table{width:100%;border-collapse:collapse;font-size:.63rem}
-th{background:rgba(255,255,255,.03);padding:4px 5px;text-align:right;color:var(--muted);font-weight:600;position:sticky;top:0;z-index:1}
+.ts{max-height:200px;overflow-y:auto}.ts::-webkit-scrollbar{width:3px}.ts::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
+table{width:100%;border-collapse:collapse;font-size:.58rem}
+th{background:rgba(255,255,255,.03);padding:3px 4px;text-align:right;color:var(--muted);font-weight:600;position:sticky;top:0;z-index:1}
 th:first-child{text-align:center}
-td{padding:3px 5px;text-align:right;border-top:1px solid rgba(255,255,255,.03);font-family:'JetBrains Mono',monospace;font-size:.6rem}
+td{padding:3px 4px;text-align:right;border-top:1px solid rgba(255,255,255,.03);font-family:'JetBrains Mono',monospace;font-size:.56rem}
 td:first-child{text-align:center;color:var(--muted);font-family:'IBM Plex Sans Thai',sans-serif}
 .pos{color:var(--green)}.neg{color:var(--ac)}
-tr.pk{background:rgba(245,158,11,.04)}
-
 /* Insight */
-.insight{background:linear-gradient(135deg,rgba(16,185,129,.06),rgba(245,158,11,.06));border:1px solid rgba(16,185,129,.15);border-radius:var(--radius);padding:12px;font-size:.7rem;line-height:1.7}
-.insight b{color:var(--green)}.insight .w{color:var(--ac)}
-
-@media(max-width:600px){
-  .summary{grid-template-columns:repeat(2,1fr)}
-  .time-grid{grid-template-columns:repeat(7,1fr)}
-  .stepper-row{flex-direction:column}
-}
+.ins{background:linear-gradient(135deg,rgba(16,185,129,.06),rgba(139,92,246,.06));border:1px solid rgba(16,185,129,.15);border-radius:var(--r);padding:10px;font-size:.65rem;line-height:1.7}
+.ins b{color:var(--green)}.ins .w{color:var(--ac)}.ins .p{color:var(--night)}
+/* Tab */
+.tabs{display:flex;gap:4px;margin-bottom:8px}
+.tab{flex:1;padding:7px;text-align:center;border-radius:8px;font-size:.7rem;font-weight:600;cursor:pointer;border:1px solid var(--border);background:var(--card);transition:.15s}
+.tab.act{border-color:var(--solar);background:rgba(245,158,11,.08);color:var(--solar)}
+.tab-night.act{border-color:var(--night);background:rgba(139,92,246,.08);color:var(--night)}
+.hidden{display:none}
+@media(max-width:600px){.sum{grid-template-columns:repeat(3,1fr)}.sr{flex-direction:column}}
 </style>
 </head>
 <body>
-<div class="container">
-  <div class="header">
-    <h1>☀️ Solar vs Consumption — บ้านชัยภูมิ</h1>
-    <p id="sysDesc">3 แผง Longi 630W + ATMOCE MI-500 ทิศใต้ | แอร์ Inverter 12,000 BTU x 1</p>
+<div class="ctr">
+  <div class="hdr">
+    <h1>☀️🌙 Solar + TOU Simulation — บ้านชัยภูมิ</h1>
+    <p id="desc">3 แผง Longi 630W + ATMOCE MI-500 | แอร์ Inv. 12K BTU × 1</p>
   </div>
 
-  <div class="summary">
-    <div class="sc"><div class="v c-s" id="sSol">-</div><div class="l">☀️ ผลิตได้ (kWh)</div></div>
-    <div class="sc"><div class="v c-a" id="sUse">-</div><div class="l">⚡ ใช้ทั้งหมด (kWh)</div></div>
-    <div class="sc"><div class="v" id="sNet">-</div><div class="l">📊 เหลือ / ขาด</div></div>
-    <div class="sc"><div class="v c-g" id="sSav">-</div><div class="l">💰 ประหยัด (บ./วัน)</div></div>
+  <!-- TOU Info -->
+  <div class="pn">
+    <div class="pt">💡 อัตราค่าไฟ TOU (PEA บ้านอยู่อาศัย แรงดัน < 12kV)</div>
+    <div class="tou-info">
+      <div class="tou-badge tou-pk">🔴 On-Peak 09:00-22:00 จ-ศ → 5.80 บ./หน่วย</div>
+      <div class="tou-badge tou-op">🔵 Off-Peak 22:00-09:00 + ส-อา → 2.64 บ./หน่วย</div>
+    </div>
   </div>
 
-  <!-- Panel & AC count -->
-  <div class="panel">
+  <!-- Summary -->
+  <div class="sum">
+    <div class="sc"><div class="v c-s" id="zSol">-</div><div class="l">☀️ Solar ผลิต</div></div>
+    <div class="sc"><div class="v c-pk" id="zPeak">-</div><div class="l">🔴 ค่าไฟ Peak ประหยัด</div></div>
+    <div class="sc"><div class="v c-op" id="zOff">-</div><div class="l">🔵 ค่าไฟ Off-Peak</div></div>
+    <div class="sc"><div class="v c-n" id="zNight">-</div><div class="l">🌙 ค่าไฟกลางคืน</div></div>
+    <div class="sc"><div class="v c-g" id="zTotal">-</div><div class="l">💰 สรุป ประหยัด/วัน</div></div>
+  </div>
+
+  <!-- Controls -->
+  <div class="pn">
     <div class="pt">⚙️ ปรับระบบ</div>
-    <div class="stepper-row">
-      <div class="stepper solar-s">
-        <div class="label">☀️ จำนวนแผง<br><small>Longi 630W + MI-500</small></div>
-        <button onclick="adjPanel(-1)">−</button>
-        <div class="num" id="panelNum">3</div>
-        <button onclick="adjPanel(1)">+</button>
-      </div>
-      <div class="stepper ac-s">
-        <div class="label">❄️ จำนวนแอร์<br><small>Inverter 12,000 BTU</small></div>
-        <button onclick="adjAC(-1)">−</button>
-        <div class="num" id="acNum">1</div>
-        <button onclick="adjAC(1)">+</button>
-      </div>
+    <div class="sr">
+      <div class="stp"><div class="lb">☀️ แผง<br><small>630W+MI-500</small></div><button onclick="adj('p',-1)">−</button><div class="nm c-s" id="nP">3</div><button onclick="adj('p',1)">+</button></div>
+      <div class="stp"><div class="lb">❄️ แอร์<br><small>Inv 12K BTU</small></div><button onclick="adj('a',-1)">−</button><div class="nm c-a" id="nA">1</div><button onclick="adj('a',1)">+</button></div>
+    </div>
+    <div class="cr" style="margin-top:6px">
+      <div class="ci"><div class="cl"><span>❄️ แอร์เฉลี่ย/ตัว</span><span class="cv c-a" id="vA">900</span></div><input type="range" class="sa" id="sA" min="600" max="1200" step="50" value="900"></div>
+      <div class="ci"><div class="cl"><span>🏠 ไฟบ้านพื้นฐาน</span><span class="cv c-h" id="vH">300</span></div><input type="range" class="sh" id="sH" min="100" max="800" step="50" value="300"></div>
     </div>
   </div>
 
-  <!-- AC Time -->
-  <div class="panel">
-    <div class="pt">🕐 ช่วงเวลาเปิดแอร์ (แตะเปิด/ปิดแต่ละชั่วโมง)</div>
-    <div class="time-grid" id="tg"></div>
-    <div class="hint">❄️ แอร์ Inverter 12,000 BTU กินไฟเฉลี่ย <span id="acWL">900</span>W/ตัว × <span id="acCntL">1</span> ตัว = <b id="acTotL">900</b>W</div>
+  <!-- Tabs -->
+  <div class="tabs">
+    <div class="tab act" onclick="switchTab('day')" id="tabDay">☀️ กลางวัน 06:00-18:00</div>
+    <div class="tab tab-night" onclick="switchTab('night')" id="tabNight">🌙 กลางคืน 18:00-06:00</div>
   </div>
 
-  <!-- Sliders -->
-  <div class="panel">
-    <div class="cr">
-      <div class="ci">
-        <div class="cl"><span>❄️ กำลังแอร์เฉลี่ย/ตัว (W)</span><span class="cv c-a" id="acV">900</span></div>
-        <input type="range" class="sa" id="slA" min="600" max="1200" step="50" value="900">
+  <!-- DAY Section -->
+  <div id="secDay">
+    <div class="pn">
+      <div class="pt">🕐 เปิดแอร์กลางวัน (แตะเปิด/ปิด)</div>
+      <div class="tg" id="tgD"></div>
+      <div class="hint">☀️ ช่วง 09:00-18:00 = <span class="c-pk">On-Peak 5.80 บ.</span> | 06:00-09:00 = <span class="c-op">Off-Peak 2.64 บ.</span></div>
+    </div>
+    <div class="pn">
+      <div class="pt">📈 กลางวัน — Solar ผลิต vs ใช้ไฟ (TOU)</div>
+      <div class="cw"><canvas id="cvD"></canvas></div>
+      <div class="lg">
+        <div class="lgi"><div class="d" style="background:var(--solar)"></div>Solar</div>
+        <div class="lgi"><div class="d" style="background:var(--ac)"></div>แอร์</div>
+        <div class="lgi"><div class="d" style="background:var(--home)"></div>ไฟบ้าน</div>
+        <div class="lgi"><div class="d" style="background:var(--green)"></div>เหลือ</div>
+        <div class="lgi"><div class="d" style="background:rgba(244,63,94,.3)"></div>ซื้อ grid</div>
       </div>
-      <div class="ci">
-        <div class="cl"><span>🏠 ไฟบ้านพื้นฐาน (W)</span><span class="cv c-h" id="hmV">300</span></div>
-        <input type="range" class="sh" id="slH" min="100" max="800" step="50" value="300">
+    </div>
+    <div class="pn"><div class="pt">📊 ตารางกลางวัน</div><div class="ts"><table><thead><tr><th>เวลา</th><th>TOU</th><th>☀️ผลิต</th><th>❄️แอร์</th><th>🏠บ้าน</th><th>⚡รวม</th><th>+/−</th><th>💰บาท</th></tr></thead><tbody id="tbD"></tbody></table></div></div>
+  </div>
+
+  <!-- NIGHT Section -->
+  <div id="secNight" class="hidden">
+    <div class="pn">
+      <div class="pt">🕐 เปิดแอร์กลางคืน (แตะเปิด/ปิด)</div>
+      <div class="tg" id="tgN"></div>
+      <div class="hint">🌙 ช่วง 18:00-22:00 = <span class="c-pk">On-Peak 5.80 บ.</span> | 22:00-06:00 = <span class="c-op">Off-Peak 2.64 บ.</span></div>
+    </div>
+    <div class="pn">
+      <div class="pt">📈 กลางคืน — ใช้ไฟจาก Grid ทั้งหมด (ไม่มี Solar)</div>
+      <div class="cw"><canvas id="cvN"></canvas></div>
+      <div class="lg">
+        <div class="lgi"><div class="d" style="background:var(--ac)"></div>แอร์</div>
+        <div class="lgi"><div class="d" style="background:var(--home)"></div>ไฟบ้าน</div>
+        <div class="lgi"><div class="d" style="background:var(--peak)"></div>Peak zone</div>
+        <div class="lgi"><div class="d" style="background:var(--offpeak)"></div>Off-Peak zone</div>
       </div>
     </div>
+    <div class="pn"><div class="pt">📊 ตารางกลางคืน</div><div class="ts"><table><thead><tr><th>เวลา</th><th>TOU</th><th>❄️แอร์</th><th>🏠บ้าน</th><th>⚡รวม</th><th>💰บาท</th></tr></thead><tbody id="tbN"></tbody></table></div></div>
   </div>
 
-  <!-- Chart -->
-  <div class="panel">
-    <div class="pt">📈 กำลังผลิต vs การใช้ไฟ รายชั่วโมง</div>
-    <div class="cw"><canvas id="cv"></canvas></div>
-    <div class="legend">
-      <div class="lg"><div class="dt" style="background:var(--solar)"></div>Solar ผลิต</div>
-      <div class="lg"><div class="dt" style="background:var(--ac)"></div>แอร์ทั้งหมด</div>
-      <div class="lg"><div class="dt" style="background:var(--home)"></div>ไฟบ้าน</div>
-      <div class="lg"><div class="dt" style="background:var(--green)"></div>เหลือ</div>
-      <div class="lg"><div class="dt" style="background:rgba(244,63,94,.3)"></div>ขาด (ซื้อ grid)</div>
-    </div>
-  </div>
-
-  <!-- Table -->
-  <div class="panel">
-    <div class="pt">📊 ตารางรายชั่วโมง</div>
-    <div class="ts">
-      <table><thead><tr><th>เวลา</th><th>☀️ ผลิต</th><th>❄️ แอร์</th><th>🏠 บ้าน</th><th>⚡ รวม</th><th>+/−</th></tr></thead>
-      <tbody id="tb"></tbody></table>
-    </div>
-  </div>
-
-  <div class="insight" id="ins"></div>
+  <div class="ins" id="ins"></div>
 </div>
 
 <script>
-const H=[6,7,8,9,10,11,12,13,14,15,16,17,18];
-const LB=H.map(h=>String(h).padStart(2,'0')+':00');
+// Hours
+const DH=[6,7,8,9,10,11,12,13,14,15,16,17]; // day 06-17 (represents 06:00-17:59)
+const NH=[18,19,20,21,22,23,0,1,2,3,4,5]; // night 18-05
+const DL=DH.map(h=>String(h).padStart(2,'0')+':00');
+const NL=NH.map(h=>String(h).padStart(2,'0')+':00');
 
-// Solar per panel (630W Longi + MI-500 97.4% eff, south-facing Chaiyaphum)
-const S1=[0,32,127,253,380,507,570,600,570,507,380,253,127];
-// Home load pattern
-const HP=[.7,.8,.9,1,1,1.05,1.1,1.1,1.05,1,.95,.85,.75];
+// TOU rates
+const PEAK=5.80, OFFPEAK=2.64;
+function touDay(h){return h>=9?PEAK:OFFPEAK;} // day: 9-17=peak, 6-8=offpeak
+function touNight(h){return (h>=18&&h<22)?PEAK:OFFPEAK;} // night: 18-21=peak, 22-05=offpeak
+
+// Solar per panel
+const S1=[0,32,127,253,380,507,570,600,570,507,380,253]; // 06-17
+// Home pattern
+const DHP=[.7,.8,.9,1,1,1.05,1.1,1.1,1.05,1,.95,.85];
+const NHP=[.8,.75,.7,.6,.5,.45,.4,.35,.3,.3,.3,.35]; // night decreasing
 
 let panels=3, acUnits=1;
-let acOn=Array(13).fill(false);
-[4,5,6,7,8,9].forEach(i=>acOn[i]=true);
+let acD=Array(12).fill(false); [4,5,6,7,8,9].forEach(i=>acD[i]=true); // 10-15
+let acN=Array(12).fill(false); [3,4,5,6,7].forEach(i=>acN[i]=true); // 21-01
 
-// Build time grid
-const tg=document.getElementById('tg');
-H.forEach((_,i)=>{
-  const b=document.createElement('div');
-  b.className='tb'+(acOn[i]?' on':'');
-  b.textContent=String(H[i]).padStart(2,'0');
-  b.dataset.i=i;
-  b.addEventListener('click',()=>{acOn[i]=!acOn[i];b.classList.toggle('on',acOn[i]);render()});
-  tg.appendChild(b);
-});
+// Build grids
+function buildGrid(el,hrs,state,cls){
+  hrs.forEach((_,i)=>{
+    const b=document.createElement('div');
+    b.className='tb'+(state[i]?' '+cls:'');
+    b.textContent=String(hrs[i]).padStart(2,'0');
+    b.addEventListener('click',()=>{state[i]=!state[i];b.classList.toggle(cls,state[i]);render()});
+    el.appendChild(b);
+  });
+}
+buildGrid(document.getElementById('tgD'),DH,acD,'on');
+buildGrid(document.getElementById('tgN'),NH,acN,'on-n');
 
-function adjPanel(d){panels=Math.max(1,Math.min(10,panels+d));document.getElementById('panelNum').textContent=panels;render()}
-function adjAC(d){acUnits=Math.max(0,Math.min(4,acUnits+d));document.getElementById('acNum').textContent=acUnits;render()}
-
-const cvs=document.getElementById('cv'),cx=cvs.getContext('2d');
-
-function render(){
-  const acW=+document.getElementById('slA').value;
-  const hmW=+document.getElementById('slH').value;
-  document.getElementById('acV').textContent=acW;
-  document.getElementById('hmV').textContent=hmW;
-  document.getElementById('acWL').textContent=acW;
-  document.getElementById('acCntL').textContent=acUnits;
-  document.getElementById('acTotL').textContent=acW*acUnits;
-
-  const kWp=(panels*0.63).toFixed(2);
-  document.getElementById('sysDesc').textContent=
-    `${panels} แผง Longi 630W (${kWp} kWp) + ATMOCE MI-500 ทิศใต้ | แอร์ Inv. 12K BTU × ${acUnits}`;
-
-  const sol=S1.map(s=>s*panels);
-  const ac=acOn.map(on=>on?acW*acUnits:0);
-  const hm=HP.map(p=>Math.round(p*hmW));
-  const tot=ac.map((a,i)=>a+hm[i]);
-  const net=sol.map((s,i)=>s-tot[i]);
-
-  const sumS=sol.reduce((a,b)=>a+b,0)/1000;
-  const sumU=tot.reduce((a,b)=>a+b,0)/1000;
-  const sumN=sumS-sumU;
-  const selfC=sol.reduce((a,s,i)=>a+Math.min(s,tot[i]),0)/1000;
-  const savB=(selfC*4.3).toFixed(0);
-
-  document.getElementById('sSol').textContent=sumS.toFixed(1);
-  document.getElementById('sUse').textContent=sumU.toFixed(1);
-  const ne=document.getElementById('sNet');
-  ne.textContent=(sumN>=0?'+':'')+sumN.toFixed(1);
-  ne.className='v '+(sumN>=0?'c-g':'c-r');
-  document.getElementById('sSav').textContent='~'+savB;
-
-  // Table
-  let tb='';
-  for(let i=0;i<H.length;i++){
-    const n=net[i],cls=n>=0?'pos':'neg',sg=n>=0?'+':'',pk=sol[i]>=panels*500?' pk':'';
-    tb+=`<tr class="${pk}"><td>${LB[i]}</td><td style="color:var(--solar)">${sol[i]}</td><td style="color:${ac[i]?'var(--ac)':'var(--muted)'}">${ac[i]}</td><td style="color:var(--home)">${hm[i]}</td><td>${tot[i]}</td><td class="${cls}">${sg}${n}</td></tr>`;
-  }
-  document.getElementById('tb').innerHTML=tb;
-
-  // Insight
-  const acH=acOn.filter(Boolean).length;
-  const sH=net.filter(n=>n>0).length,dH=net.filter(n=>n<0).length;
-  const gB=net.filter(n=>n<0).reduce((a,b)=>a+b,0)/1000;
-  const gC=(Math.abs(gB)*4.3).toFixed(0);
-  const sr=sumU>0?Math.min(100,Math.round(selfC/sumU*100)):0;
-
-  document.getElementById('ins').innerHTML=`
-    <b>💡 สรุป:</b> ${panels} แผง (${kWp} kWp) | แอร์ ${acUnits} ตัว เปิด ${acH} ชม.<br>
-    ผลิต <b>${sumS.toFixed(1)} kWh</b> ใช้ <b>${sumU.toFixed(1)} kWh</b>
-    ${sumN>=0
-      ?` → ✅ <b>เหลือ ${sumN.toFixed(1)} kWh</b> ประหยัด ~<b>${savB} บ./วัน</b>`
-      :` → ⚠️ ขาด <span class="w">${Math.abs(sumN).toFixed(1)} kWh</span> ซื้อ grid ~<span class="w">${gC} บ.</span> | ประหยัด ~<b>${savB} บ./วัน</b>`
-    }<br>
-    Self-use: <b>${sr}%</b> | เหลือ ${sH} ชม. | ขาด ${dH} ชม.<br>
-    📅 ประหยัด/เดือน ≈ <b>${(savB*30).toLocaleString()} บาท</b> (30 วัน, แดดดี)
-    ${panels<=3&&sumN<-1?'<br>💡 <b>ลองเพิ่มแผงดู</b> — ATMOCE ขยายง่ายแค่เพิ่มแผง+MI-500':''}
-    ${acUnits>=2&&sumN<-2?'<br>💡 <span class="w">แอร์หลายตัว กินไฟเยอะ</span> — อาจต้องเพิ่มแผงหรือลดช่วงเวลาเปิด':''}
-  `;
-  drawChart(sol,ac,hm,tot,net);
+function adj(t,d){
+  if(t==='p') panels=Math.max(1,Math.min(10,panels+d)),document.getElementById('nP').textContent=panels;
+  else acUnits=Math.max(0,Math.min(4,acUnits+d)),document.getElementById('nA').textContent=acUnits;
+  render();
 }
 
-function drawChart(sol,ac,hm,tot,net){
+function switchTab(t){
+  document.getElementById('secDay').classList.toggle('hidden',t!=='day');
+  document.getElementById('secNight').classList.toggle('hidden',t!=='night');
+  document.getElementById('tabDay').classList.toggle('act',t==='day');
+  document.getElementById('tabNight').classList.toggle('act',t==='night');
+}
+
+const cD=document.getElementById('cvD'),xD=cD.getContext('2d');
+const cN=document.getElementById('cvN'),xN=cN.getContext('2d');
+
+function render(){
+  const acW=+document.getElementById('sA').value;
+  const hmW=+document.getElementById('sH').value;
+  document.getElementById('vA').textContent=acW;
+  document.getElementById('vH').textContent=hmW;
+  const kWp=(panels*.63).toFixed(2);
+  document.getElementById('desc').textContent=`${panels} แผง (${kWp} kWp) + ATMOCE MI-500 | แอร์ Inv. 12K BTU × ${acUnits}`;
+
+  // === DAY ===
+  const sol=S1.map(s=>s*panels);
+  const acDW=acD.map(on=>on?acW*acUnits:0);
+  const hmD=DHP.map(p=>Math.round(p*hmW));
+  const totD=acDW.map((a,i)=>a+hmD[i]);
+  const netD=sol.map((s,i)=>s-totD[i]);
+
+  let daySavePeak=0, daySaveOff=0, dayGridCost=0;
+  for(let i=0;i<DH.length;i++){
+    const rate=touDay(DH[i]);
+    const selfUse=Math.min(sol[i],totD[i])/1000;
+    daySavePeak+= (DH[i]>=9)? selfUse*PEAK : 0;
+    daySaveOff+= (DH[i]<9)? selfUse*OFFPEAK : 0;
+    const grid=Math.max(0,totD[i]-sol[i])/1000;
+    dayGridCost+=grid*rate;
+  }
+
+  // === NIGHT ===
+  const acNW=acN.map(on=>on?acW*acUnits:0);
+  const hmN=NHP.map(p=>Math.round(p*hmW));
+  const totN=acNW.map((a,i)=>a+hmN[i]);
+
+  let nightCost=0, nightPeakCost=0, nightOffCost=0;
+  for(let i=0;i<NH.length;i++){
+    const rate=touNight(NH[i]);
+    const cost=totN[i]/1000*rate;
+    nightCost+=cost;
+    if(NH[i]>=18&&NH[i]<22) nightPeakCost+=cost; else nightOffCost+=cost;
+  }
+
+  const totalSolar=sol.reduce((a,b)=>a+b,0)/1000;
+  const totalDaySave=daySavePeak+daySaveOff;
+
+  // Summary
+  document.getElementById('zSol').textContent=totalSolar.toFixed(1)+' kWh';
+  document.getElementById('zPeak').textContent='−'+daySavePeak.toFixed(0)+' บ.';
+  document.getElementById('zOff').textContent=nightCost.toFixed(0)+' บ.';
+  document.getElementById('zNight').textContent=nightCost.toFixed(0)+' บ.';
+  const netSave=totalDaySave-dayGridCost;
+  document.getElementById('zTotal').textContent='~'+(totalDaySave).toFixed(0)+' บ.';
+
+  // Day table
+  let tbD='';
+  for(let i=0;i<DH.length;i++){
+    const n=netD[i],rate=touDay(DH[i]);
+    const isPk=DH[i]>=9;
+    const saved=(Math.min(sol[i],totD[i])/1000*rate);
+    const gridCost=(Math.max(0,totD[i]-sol[i])/1000*rate);
+    tbD+=`<tr><td>${DL[i]}</td><td class="${isPk?'c-pk':'c-op'}">${isPk?'Peak':'Off'}</td><td style="color:var(--solar)">${sol[i]}</td><td style="color:${acDW[i]?'var(--ac)':'var(--muted)'}">${acDW[i]}</td><td style="color:var(--home)">${hmD[i]}</td><td>${totD[i]}</td><td class="${n>=0?'pos':'neg'}">${n>=0?'+':''}${n}</td><td class="${n>=0?'pos':'neg'}">${n>=0?'-'+saved.toFixed(1):'+'+gridCost.toFixed(1)}</td></tr>`;
+  }
+  document.getElementById('tbD').innerHTML=tbD;
+
+  // Night table
+  let tbN='';
+  for(let i=0;i<NH.length;i++){
+    const rate=touNight(NH[i]);
+    const isPk=NH[i]>=18&&NH[i]<22;
+    const cost=(totN[i]/1000*rate);
+    tbN+=`<tr><td>${NL[i]}</td><td class="${isPk?'c-pk':'c-op'}">${isPk?'Peak':'Off'}</td><td style="color:${acNW[i]?'var(--night)':'var(--muted)'}">${acNW[i]}</td><td style="color:var(--home)">${hmN[i]}</td><td>${totN[i]}</td><td class="c-r">${cost.toFixed(1)}</td></tr>`;
+  }
+  document.getElementById('tbN').innerHTML=tbN;
+
+  // Insight
+  const dayACH=acD.filter(Boolean).length, nightACH=acN.filter(Boolean).length;
+  const monthSave=(totalDaySave*30);
+  const monthNight=(nightCost*30);
+  const monthNet=monthSave-monthNight;
+  document.getElementById('ins').innerHTML=`
+    <b>📊 สรุปรายวัน (TOU):</b><br>
+    ☀️ กลางวัน: Solar ช่วยประหยัดค่าไฟ Peak ได้ <b>${daySavePeak.toFixed(0)} บ.</b> + Off-Peak <b>${daySaveOff.toFixed(0)} บ.</b> = <b>${totalDaySave.toFixed(0)} บ./วัน</b>
+    ${dayGridCost>0?' | ซื้อ grid เพิ่ม <span class="w">'+dayGridCost.toFixed(0)+' บ.</span>':''}<br>
+    🌙 กลางคืน: ค่าไฟ Peak (18-22) <span class="w">${nightPeakCost.toFixed(0)} บ.</span> + Off-Peak (22-06) <span class="p">${nightOffCost.toFixed(0)} บ.</span> = <span class="w">${nightCost.toFixed(0)} บ./คืน</span><br>
+    💡 <b>ยิ่งเลื่อนแอร์ไปหลัง 22:00 ยิ่งประหยัด!</b> (Off-Peak 2.64 vs Peak 5.80 = ถูกกว่า 2.2 เท่า)<br>
+    📅 ประมาณ/เดือน: Solar ประหยัด <b>~${monthSave.toFixed(0).toLocaleString()} บ.</b> | ค่าไฟกลางคืน ~<span class="w">${monthNight.toFixed(0)} บ.</span>
+    ${panels<=3&&dayGridCost>5?'<br>💡 ลองเพิ่มแผง → ลดค่า grid ช่วง Peak ได้อีก':''}
+  `;
+
+  drawDay(sol,acDW,hmD,totD,netD);
+  drawNight(acNW,hmN,totN);
+}
+
+function drawChart(cv,cx,labels,hours,getData){
   const dpr=window.devicePixelRatio||1;
-  const r=cvs.parentElement.getBoundingClientRect();
-  cvs.width=r.width*dpr;cvs.height=r.height*dpr;
+  const r=cv.parentElement.getBoundingClientRect();
+  cv.width=r.width*dpr;cv.height=r.height*dpr;
   cx.scale(dpr,dpr);
-  const W=r.width,Ht=r.height;
-  cx.clearRect(0,0,W,Ht);
+  const W=r.width,H=r.height;
+  cx.clearRect(0,0,W,H);
+  const p={t:8,r:10,b:26,l:36},cw=W-p.l-p.r,ch=H-p.t-p.b;
+  return{W,H,p,cw,ch,xp:i=>p.l+(i/(labels.length-1))*cw,yp:(v,mx)=>p.t+ch-(v/mx)*ch,labels};
+}
 
-  const p={t:8,r:10,b:28,l:38};
-  const cw=W-p.l-p.r,ch=Ht-p.t-p.b;
+function drawDay(sol,ac,hm,tot,net){
+  const c=drawChart(cD,xD,DL,DH,null);
   const mx=Math.max(2000,...sol,...tot)*1.15;
+  const{W,H,p,xp,yp}=c;
 
-  const xp=i=>p.l+(i/(H.length-1))*cw;
-  const yp=v=>p.t+ch-(v/mx)*ch;
+  // TOU zones
+  // Off-peak: 06-08 (idx 0-2), Peak: 09-17 (idx 3-11)
+  const peakStart=xp(3),peakEnd=xp(11);
+  xD.fillStyle='rgba(239,68,68,.04)';
+  xD.fillRect(peakStart,p.t,peakEnd-peakStart,H-p.t-p.b);
+  xD.fillStyle='rgba(34,211,238,.03)';
+  xD.fillRect(p.l,p.t,peakStart-p.l,H-p.t-p.b);
 
   // Grid
-  cx.strokeStyle='rgba(255,255,255,.05)';cx.lineWidth=1;
-  cx.fillStyle='#4a5a78';cx.font='9px JetBrains Mono';cx.textAlign='right';
-  for(let v=0;v<=mx;v+=500){
-    cx.beginPath();cx.moveTo(p.l,yp(v));cx.lineTo(W-p.r,yp(v));cx.stroke();
-    cx.fillText(v>=1000?(v/1000).toFixed(1)+'k':v+'',p.l-4,yp(v)+3);
-  }
-  cx.fillStyle='#4a5a78';cx.font='8px JetBrains Mono';cx.textAlign='center';
-  for(let i=0;i<H.length;i++) cx.fillText(LB[i].slice(0,2),xp(i),Ht-8);
+  xD.strokeStyle='rgba(255,255,255,.04)';xD.lineWidth=1;
+  xD.fillStyle='#4a5a78';xD.font='8px JetBrains Mono';xD.textAlign='right';
+  for(let v=0;v<=mx;v+=500){xD.beginPath();xD.moveTo(p.l,yp(v,mx));xD.lineTo(W-p.r,yp(v,mx));xD.stroke();xD.fillText(v>=1000?(v/1000).toFixed(1)+'k':v+'',p.l-3,yp(v,mx)+3)}
+  xD.textAlign='center';
+  for(let i=0;i<DL.length;i++) xD.fillText(DL[i].slice(0,2),xp(i),H-6);
 
-  // Shade
-  for(let i=0;i<H.length-1;i++){
+  // Shade surplus/deficit
+  for(let i=0;i<DH.length-1;i++){
     const x1=xp(i),x2=xp(i+1);
-    if(net[i]>=0&&net[i+1]>=0){
-      cx.fillStyle='rgba(16,185,129,.1)';
-      cx.beginPath();cx.moveTo(x1,yp(sol[i]));cx.lineTo(x2,yp(sol[i+1]));cx.lineTo(x2,yp(tot[i+1]));cx.lineTo(x1,yp(tot[i]));cx.closePath();cx.fill();
-    }else if(net[i]<0&&net[i+1]<0){
-      cx.fillStyle='rgba(244,63,94,.07)';
-      cx.beginPath();cx.moveTo(x1,yp(tot[i]));cx.lineTo(x2,yp(tot[i+1]));cx.lineTo(x2,yp(sol[i+1]));cx.lineTo(x1,yp(sol[i]));cx.closePath();cx.fill();
-    }
+    if(net[i]>=0&&net[i+1]>=0){xD.fillStyle='rgba(16,185,129,.1)';xD.beginPath();xD.moveTo(x1,yp(sol[i],mx));xD.lineTo(x2,yp(sol[i+1],mx));xD.lineTo(x2,yp(tot[i+1],mx));xD.lineTo(x1,yp(tot[i],mx));xD.closePath();xD.fill()}
+    else if(net[i]<0&&net[i+1]<0){xD.fillStyle='rgba(244,63,94,.06)';xD.beginPath();xD.moveTo(x1,yp(tot[i],mx));xD.lineTo(x2,yp(tot[i+1],mx));xD.lineTo(x2,yp(sol[i+1],mx));xD.lineTo(x1,yp(sol[i],mx));xD.closePath();xD.fill()}
   }
 
   // Home fill
-  cx.fillStyle='rgba(59,130,246,.12)';
-  cx.beginPath();cx.moveTo(xp(0),yp(0));
-  for(let i=0;i<H.length;i++) cx.lineTo(xp(i),yp(hm[i]));
-  cx.lineTo(xp(H.length-1),yp(0));cx.closePath();cx.fill();
-
+  xD.fillStyle='rgba(59,130,246,.1)';xD.beginPath();xD.moveTo(xp(0),yp(0,mx));
+  for(let i=0;i<DH.length;i++) xD.lineTo(xp(i),yp(hm[i],mx));
+  xD.lineTo(xp(DH.length-1),yp(0,mx));xD.closePath();xD.fill();
   // AC fill
-  cx.fillStyle='rgba(244,63,94,.1)';
-  cx.beginPath();cx.moveTo(xp(0),yp(hm[0]));
-  for(let i=0;i<H.length;i++) cx.lineTo(xp(i),yp(tot[i]));
-  for(let i=H.length-1;i>=0;i--) cx.lineTo(xp(i),yp(hm[i]));
-  cx.closePath();cx.fill();
+  xD.fillStyle='rgba(244,63,94,.08)';xD.beginPath();xD.moveTo(xp(0),yp(hm[0],mx));
+  for(let i=0;i<DH.length;i++) xD.lineTo(xp(i),yp(tot[i],mx));
+  for(let i=DH.length-1;i>=0;i--) xD.lineTo(xp(i),yp(hm[i],mx));
+  xD.closePath();xD.fill();
 
-  function line(d,c,w,da){
-    cx.strokeStyle=c;cx.lineWidth=w;cx.setLineDash(da||[]);cx.lineJoin='round';cx.lineCap='round';
-    cx.beginPath();d.forEach((v,i)=>i===0?cx.moveTo(xp(i),yp(v)):cx.lineTo(xp(i),yp(v)));cx.stroke();cx.setLineDash([]);
-  }
-  line(hm,'rgba(59,130,246,.5)',1.2,[4,3]);
-  line(tot,'#f43f5e',2);
-  line(sol,'#f59e0b',2.5);
+  line(xD,hm,i=>xp(i),v=>yp(v,mx),'rgba(59,130,246,.5)',1,[4,3]);
+  line(xD,tot,i=>xp(i),v=>yp(v,mx),'#f43f5e',1.8);
+  line(xD,sol,i=>xp(i),v=>yp(v,mx),'#f59e0b',2.2);
+  dots(xD,sol,i=>xp(i),v=>yp(v,mx),'#f59e0b');
+  labels_net(xD,net,sol,tot,i=>xp(i),v=>yp(v,mx));
+}
 
-  // Dots
-  for(let i=0;i<sol.length;i++){
-    if(sol[i]>0){
-      cx.fillStyle='#f59e0b';cx.beginPath();cx.arc(xp(i),yp(sol[i]),3.5,0,Math.PI*2);cx.fill();
-      cx.fillStyle='#0c1220';cx.beginPath();cx.arc(xp(i),yp(sol[i]),1.5,0,Math.PI*2);cx.fill();
-    }
-  }
-  // Labels
-  for(let i=0;i<H.length;i++){
-    if(net[i]>150){
-      cx.fillStyle='rgba(16,185,129,.7)';cx.font='bold 8px JetBrains Mono';cx.textAlign='center';
-      cx.fillText('+'+net[i],xp(i),yp(sol[i])-8);
-    }else if(net[i]<-150){
-      cx.fillStyle='rgba(244,63,94,.7)';cx.font='bold 8px JetBrains Mono';cx.textAlign='center';
-      cx.fillText(net[i],xp(i),yp(tot[i])-8);
+function drawNight(ac,hm,tot){
+  const c=drawChart(cN,xN,NL,NH,null);
+  const mx=Math.max(1500,...tot)*1.2;
+  const{W,H,p,xp,yp}=c;
+
+  // TOU zones: 18-21=peak(idx0-3), 22-05=offpeak(idx4-11)
+  const offStart=xp(4);
+  xN.fillStyle='rgba(239,68,68,.04)';
+  xN.fillRect(p.l,p.t,offStart-p.l,H-p.t-p.b);
+  xN.fillStyle='rgba(34,211,238,.04)';
+  xN.fillRect(offStart,p.t,W-p.r-offStart,H-p.t-p.b);
+
+  xN.strokeStyle='rgba(255,255,255,.04)';xN.lineWidth=1;
+  xN.fillStyle='#4a5a78';xN.font='8px JetBrains Mono';xN.textAlign='right';
+  for(let v=0;v<=mx;v+=500){xN.beginPath();xN.moveTo(p.l,yp(v,mx));xN.lineTo(W-p.r,yp(v,mx));xN.stroke();xN.fillText(v>=1000?(v/1000).toFixed(1)+'k':v+'',p.l-3,yp(v,mx)+3)}
+  xN.textAlign='center';
+  for(let i=0;i<NL.length;i++) xN.fillText(NL[i].slice(0,2),xp(i),H-6);
+
+  // Home fill
+  xN.fillStyle='rgba(59,130,246,.1)';xN.beginPath();xN.moveTo(xp(0),yp(0,mx));
+  for(let i=0;i<NH.length;i++) xN.lineTo(xp(i),yp(hm[i],mx));
+  xN.lineTo(xp(NH.length-1),yp(0,mx));xN.closePath();xN.fill();
+  // AC fill
+  xN.fillStyle='rgba(139,92,246,.1)';xN.beginPath();xN.moveTo(xp(0),yp(hm[0],mx));
+  for(let i=0;i<NH.length;i++) xN.lineTo(xp(i),yp(tot[i],mx));
+  for(let i=NH.length-1;i>=0;i--) xN.lineTo(xp(i),yp(hm[i],mx));
+  xN.closePath();xN.fill();
+
+  line(xN,hm,i=>xp(i),v=>yp(v,mx),'rgba(59,130,246,.5)',1,[4,3]);
+  line(xN,tot,i=>xp(i),v=>yp(v,mx),'#8b5cf6',2);
+
+  // Cost labels
+  for(let i=0;i<NH.length;i++){
+    if(tot[i]>100){
+      const rate=touNight(NH[i]);
+      const cost=(tot[i]/1000*rate).toFixed(1);
+      xN.fillStyle=NH[i]>=18&&NH[i]<22?'rgba(239,68,68,.6)':'rgba(34,211,238,.6)';
+      xN.font='bold 7px JetBrains Mono';xN.textAlign='center';
+      xN.fillText(cost+'฿',xp(i),yp(tot[i],mx)-7);
     }
   }
 }
 
-document.getElementById('slA').addEventListener('input',render);
-document.getElementById('slH').addEventListener('input',render);
+function line(cx,d,xf,yf,c,w,da){cx.strokeStyle=c;cx.lineWidth=w;cx.setLineDash(da||[]);cx.lineJoin='round';cx.lineCap='round';cx.beginPath();d.forEach((v,i)=>i===0?cx.moveTo(xf(i),yf(v)):cx.lineTo(xf(i),yf(v)));cx.stroke();cx.setLineDash([])}
+function dots(cx,d,xf,yf,c){d.forEach((v,i)=>{if(v>0){cx.fillStyle=c;cx.beginPath();cx.arc(xf(i),yf(v),3,0,Math.PI*2);cx.fill();cx.fillStyle='#0c1220';cx.beginPath();cx.arc(xf(i),yf(v),1.2,0,Math.PI*2);cx.fill()}})}
+function labels_net(cx,net,sol,tot,xf,yf){net.forEach((n,i)=>{if(Math.abs(n)>120){cx.fillStyle=n>=0?'rgba(16,185,129,.7)':'rgba(244,63,94,.7)';cx.font='bold 7px JetBrains Mono';cx.textAlign='center';cx.fillText((n>=0?'+':'')+n,xf(i),yf(n>=0?sol[i]:tot[i])-7)}})}
+
+document.getElementById('sA').addEventListener('input',render);
+document.getElementById('sH').addEventListener('input',render);
 window.addEventListener('resize',render);
 render();
 </script>
