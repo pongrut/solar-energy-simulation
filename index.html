@@ -289,14 +289,25 @@ function render(){
   const monthSave=(totalDaySave*30);
   const monthNight=(nightCost*30);
   const monthNet=monthSave-monthNight;
+  const dailyNet=totalDaySave-dayGridCost-nightCost;
+  const monthlyNet=(totalDaySave-dayGridCost-nightCost)*30;
+  const monthGridDay=dayGridCost*30;
   document.getElementById('ins').innerHTML=`
     <b>📊 สรุปรายวัน (TOU):</b><br>
     ☀️ กลางวัน: Solar ช่วยประหยัดค่าไฟ Peak ได้ <b>${daySavePeak.toFixed(0)} บ.</b> + Off-Peak <b>${daySaveOff.toFixed(0)} บ.</b> = <b>${totalDaySave.toFixed(0)} บ./วัน</b>
     ${dayGridCost>0?' | ซื้อ grid เพิ่ม <span class="w">'+dayGridCost.toFixed(0)+' บ.</span>':''}<br>
     🌙 กลางคืน: ค่าไฟ Peak (18-22) <span class="w">${nightPeakCost.toFixed(0)} บ.</span> + Off-Peak (22-06) <span class="p">${nightOffCost.toFixed(0)} บ.</span> = <span class="w">${nightCost.toFixed(0)} บ./คืน</span><br>
     💡 <b>ยิ่งเลื่อนแอร์ไปหลัง 22:00 ยิ่งประหยัด!</b> (Off-Peak 2.64 vs Peak 5.80 = ถูกกว่า 2.2 เท่า)<br>
-    📅 ประมาณ/เดือน: Solar ประหยัด <b>~${monthSave.toFixed(0).toLocaleString()} บ.</b> | ค่าไฟกลางคืน ~<span class="w">${monthNight.toFixed(0)} บ.</span>
+    <hr style="border:none;border-top:1px solid rgba(255,255,255,.08);margin:6px 0">
+    <b>💰 สรุปรวมกลางวัน + กลางคืน:</b><br>
+    Solar ประหยัด <b>${totalDaySave.toFixed(0)} บ.</b> − ซื้อ grid กลางวัน <span class="w">${dayGridCost.toFixed(0)} บ.</span> − ค่าไฟกลางคืน <span class="w">${nightCost.toFixed(0)} บ.</span> = ${dailyNet>=0?'<b>ประหยัดสุทธิ '+dailyNet.toFixed(0)+' บ./วัน</b>':'<span class="w">จ่ายสุทธิ '+Math.abs(dailyNet).toFixed(0)+' บ./วัน</span>'}<br>
+    📅 <b>ประมาณ/เดือน (30 วัน):</b><br>
+    &nbsp;&nbsp;✅ Solar ประหยัด: <b>~${monthSave.toFixed(0)} บ.</b><br>
+    &nbsp;&nbsp;⚡ ซื้อ grid กลางวัน: <span class="w">~${monthGridDay.toFixed(0)} บ.</span><br>
+    &nbsp;&nbsp;🌙 ค่าไฟกลางคืน: <span class="w">~${monthNight.toFixed(0)} บ.</span><br>
+    &nbsp;&nbsp;${monthlyNet>=0?'💚 <b>ประหยัดสุทธิ/เดือน: ~'+monthlyNet.toFixed(0)+' บ.</b>':'🔴 <span class="w">จ่ายค่าไฟสุทธิ/เดือน: ~'+Math.abs(monthlyNet).toFixed(0)+' บ.</span>'}
     ${panels<=3&&dayGridCost>5?'<br>💡 ลองเพิ่มแผง → ลดค่า grid ช่วง Peak ได้อีก':''}
+    ${acUnits>=2&&monthlyNet<0?'<br>💡 แอร์หลายตัว → พิจารณาเพิ่มแผงหรือลดเวลาเปิด':''}
   `;
 
   if(!document.getElementById('secDay').classList.contains('hidden')) drawDay(sol,acDW,hmD,totD,netD);
