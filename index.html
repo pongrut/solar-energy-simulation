@@ -208,6 +208,7 @@ function switchTab(t){
   document.getElementById('secNight').classList.toggle('hidden',t!=='night');
   document.getElementById('tabDay').classList.toggle('act',t==='day');
   document.getElementById('tabNight').classList.toggle('act',t==='night');
+  setTimeout(render,50);
 }
 
 const cD=document.getElementById('cvD'),xD=cD.getContext('2d');
@@ -298,8 +299,8 @@ function render(){
     ${panels<=3&&dayGridCost>5?'<br>💡 ลองเพิ่มแผง → ลดค่า grid ช่วง Peak ได้อีก':''}
   `;
 
-  drawDay(sol,acDW,hmD,totD,netD);
-  drawNight(acNW,hmN,totN);
+  if(!document.getElementById('secDay').classList.contains('hidden')) drawDay(sol,acDW,hmD,totD,netD);
+  if(!document.getElementById('secNight').classList.contains('hidden')) drawNight(acNW,hmN,totN);
 }
 
 function drawChart(cv,cx,labels,hours,getData){
